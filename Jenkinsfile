@@ -23,6 +23,14 @@ pipeline {
         archiveArtifacts artifacts: 'target/*.jar', fingerprint: true
       }
     }
+    stage('Docker Build and Push'){
+      steps (
+        sh 'print.env'
+        sh 'docker build -t chamaray/numeric-app:"$GIT_COMMIT"'
+        sh 'docker push chamaray/numeric-app:"$GIT_COMMIT"'
+      )
+    }
+    
 
   }
 }
