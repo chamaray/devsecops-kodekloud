@@ -3,16 +3,24 @@ pipeline {
 
   stages {
 
-    stage('Build Artifact') {
+    stage('Build & Test') {
       steps {
-        sh "mvn clean package -DskipTests=true"
-        archiveArtifacts artifacts: 'target/*.jar'
+        sh "mvn clean verify"
+      }
+      post {
+        always {
+          // JUnit Reports
+          junit 'target/surefire-reports/*.xml'
+
+          // JaCoCo Coverage
+          jacoco execPattern: 'target/jacoco.exec'
+        }
       }
     }
 
-    stage('Unit Test') {
+    stage('Archive Artifact') {
       steps {
-        sh "mvn test"
+        archiveArtifacts artifacts: 'target/*.jar', fingerprint: true
       }
     }
 
