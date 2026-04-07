@@ -9,10 +9,7 @@ pipeline {
       }
       post {
         always {
-          // JUnit Reports
           junit 'target/surefire-reports/*.xml'
-
-          // JaCoCo Coverage
           jacoco execPattern: 'target/jacoco.exec'
         }
       }
@@ -23,14 +20,19 @@ pipeline {
         archiveArtifacts artifacts: 'target/*.jar', fingerprint: true
       }
     }
-    stage('Docker Build and Push'){
-      steps (
-        sh 'print.env'
-        sh 'docker build -t chamaray/numeric-app:"$GIT_COMMIT"'
-        sh 'docker push chamaray/numeric-app:"$GIT_COMMIT"'
-      )
+
+    stage('Docker Build and Push') {
+      steps {
+        withDockerRegistry([credentialsId: "docker-hub", url: ""]) {
+          
+          sh 'printenv'
+
+          sh "docker build -t chamaray/numeric-app:${GIT_COMMIT} ."
+
+          sh "docker push chamaray/numeric-app:${GIT_COMMIT}"
+        }
+      }
     }
-    
 
   }
 }
