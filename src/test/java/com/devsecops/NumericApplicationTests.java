@@ -37,6 +37,3 @@ class NumericApplicationTests {
                 .andExpect(status().isOk());
     }
 }
-    
-
-}
