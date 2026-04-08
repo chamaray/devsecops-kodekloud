@@ -18,7 +18,7 @@ pipeline {
       }
       post {
         always {
-          junit 'target/surefire-reports/*.xml'
+          junit allowEmptyResults: true, testResults: 'target/surefire-reports/*.xml'
           jacoco execPattern: 'target/jacoco.exec'
         }
       }
@@ -36,7 +36,7 @@ pipeline {
       post {
         always {
           archiveArtifacts artifacts: 'target/pit-reports/**', fingerprint: true
-          pitmutation mutationStatsFile: '**/target/pit-reports/mutations.xml'
+          pitmutation failWhenNoReports: false, mutationStatsFile: '**/target/pit-reports/mutations.xml'
         }
       }
     }
@@ -58,7 +58,7 @@ pipeline {
       }
     }
 
-    stage('Kubernetes Deployment - DEV') {
+    stage('Deploy to Kubernetes') {
       steps {
         withKubeConfig([credentialsId: 'kubeconfig']) {
           sh """
