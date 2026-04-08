@@ -4,7 +4,6 @@
          http://maven.apache.org/xsd/maven-4.0.0.xsd">
 
     <modelVersion>4.0.0</modelVersion>
-
     <groupId>com.devsecops</groupId>
     <artifactId>numeric</artifactId>
     <version>1.0.0</version>
@@ -20,7 +19,6 @@
     </properties>
 
     <dependencies>
-
         <!-- Spring Boot -->
         <dependency>
             <groupId>org.springframework.boot</groupId>
@@ -33,51 +31,43 @@
             <artifactId>slf4j-api</artifactId>
         </dependency>
 
-        <!-- Testing (JUnit 5) -->
+        <!-- Testing -->
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-test</artifactId>
             <scope>test</scope>
         </dependency>
 
-        <!-- PIT JUnit5 Support -->
+        <!-- PIT JUnit5 Plugin -->
         <dependency>
             <groupId>org.pitest</groupId>
             <artifactId>pitest-junit5-plugin</artifactId>
             <version>1.2.1</version>
         </dependency>
-
     </dependencies>
 
     <build>
         <plugins>
-
-            <!-- Spring Boot -->
             <plugin>
                 <groupId>org.springframework.boot</groupId>
                 <artifactId>spring-boot-maven-plugin</artifactId>
             </plugin>
 
-            <!-- JaCoCo -->
             <plugin>
                 <groupId>org.jacoco</groupId>
                 <artifactId>jacoco-maven-plugin</artifactId>
                 <version>0.8.11</version>
                 <executions>
                     <execution>
-                        <goals>
-                            <goal>prepare-agent</goal>
-                        </goals>
+                        <goals><goal>prepare-agent</goal></goals>
                     </execution>
                 </executions>
             </plugin>
 
-            <!-- PIT Mutation Testing -->
             <plugin>
                 <groupId>org.pitest</groupId>
                 <artifactId>pitest-maven</artifactId>
                 <version>1.15.0</version>
-
                 <configuration>
                     <targetClasses>
                         <param>com.devsecops.*</param>
@@ -88,8 +78,6 @@
                     <useClasspathJar>true</useClasspathJar>
                 </configuration>
             </plugin>
-
         </plugins>
     </build>
-
 </project>
