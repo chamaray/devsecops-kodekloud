@@ -3,7 +3,6 @@ pipeline {
 
   environment {
     IMAGE_NAME = "chamaray/numeric-app"
-    SONAR_HOST_URL = "http://51.142.180.96:9000"
   }
 
   stages {
@@ -33,14 +32,20 @@ pipeline {
         }
       }
       steps {
-        withCredentials([string(credentialsId: 'sonar-token', variable: 'SONAR_TOKEN')]) {
+        withSonarQubeEnv('SonarQube') {
           sh """
           mvn sonar:sonar \
-          -Dsonar.projectKey=numeric-appication \
-          -Dsonar.projectName=numeric-appication \
-          -Dsonar.host.url=http://51.142.180.96:9000 \
-          -Dsonar.login=$SONAR_TOKEN
+          -Dsonar.projectKey=numeric-application \
+          -Dsonar.projectName=numeric-application
           """
+        }
+      }
+    }
+
+    stage('Quality Gate') {
+      steps {
+        timeout(time: 2, unit: 'MINUTES') {
+          waitForQualityGate abortPipeline: true
         }
       }
     }
