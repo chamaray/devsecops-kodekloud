@@ -42,7 +42,17 @@ stage('Kubernetes Deployment - DEV') {
         }
       }
     }
-
+stage('Mutation-Test----PIT') {
+  steps {
+    sh "mvn clean test org.pitest:pitest-maven:mutationCoverage"
+  }
+  post {
+    always {
+      pitmutation mutationStatsFile: '**/target/pit-reports/mutations.xml'
+      archiveArtifacts artifacts: 'target/pit-reports/**', fingerprint: true
+    }
+  }
+}
 
     
   }
