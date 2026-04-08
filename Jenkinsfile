@@ -5,28 +5,24 @@ pipeline {
         IMAGE_NAME = "chamaray/numeric-app"
     }
 
-    stage('Mutation Testing (PIT)') {
-  agent {
-    docker {
-      image 'maven:3.9.6-eclipse-temurin-17'
-    }
-  }
-  steps {
-    sh "mvn org.pitest:pitest-maven:mutationCoverage"
-  }
-  post {
-    always {
-      archiveArtifacts artifacts: 'target/pit-reports/**', fingerprint: true
-      script {
-        try {
-          pitmutation mutationStatsFile: '**/target/pit-reports/mutations.xml'
-        } catch (Exception e) {
-          echo "Pit mutation reports not found, skipping..."
+    stages {
+
+        stage('Build & Unit Test') {
+            agent {
+                docker {
+                    image 'maven:3.9.6-eclipse-temurin-17'
+                }
+            }
+            steps {
+                sh "mvn clean package"
+            }
+            post {
+                always {
+                    junit allowEmptyResults: true, testResults: 'target/surefire-reports/*.xml'
+                    jacoco execPattern: 'target/jacoco.exec'
+                }
+            }
         }
-      }
-    }
-  }
-}
 
         stage('Mutation Testing (PIT)') {
             agent {
@@ -61,8 +57,8 @@ pipeline {
             steps {
                 withDockerRegistry([credentialsId: "docker-hub", url: ""]) {
                     sh """
-                    docker build -t ${IMAGE_NAME}:${GIT_COMMIT} .
-                    docker push ${IMAGE_NAME}:${GIT_COMMIT}
+                        docker build -t ${IMAGE_NAME}:${GIT_COMMIT} .
+                        docker push ${IMAGE_NAME}:${GIT_COMMIT}
                     """
                 }
             }
@@ -72,8 +68,8 @@ pipeline {
             steps {
                 withKubeConfig([credentialsId: 'kubeconfig']) {
                     sh """
-                    sed -i 's#replace#${IMAGE_NAME}:${GIT_COMMIT}#g' k8s_deployment_service.yaml
-                    kubectl apply -f k8s_deployment_service.yaml
+                        sed -i 's#replace#${IMAGE_NAME}:${GIT_COMMIT}#g' k8s_deployment_service.yaml
+                        kubectl apply -f k8s_deployment_service.yaml
                     """
                 }
             }
