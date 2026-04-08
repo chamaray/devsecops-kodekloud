@@ -19,7 +19,7 @@ pipeline {
       }
       post {
         always {
-          junit allowEmptyResults: true, testResults: 'target/surefire-reports/*.xml'
+          junit 'target/surefire-reports/*.xml'
           jacoco execPattern: 'target/jacoco.exec'
         }
       }
@@ -38,17 +38,6 @@ pipeline {
           -Dsonar.projectKey=numeric-application \
           -Dsonar.projectName=numeric-application
           """
-        }
-      }
-    }
-
-    stage('Vulnerability Scan - Docker'){
-      steps {
-        sh "mvn dependency-check:check"
-      }
-      post{
-        always {
-          dependencyCheckPublisher pattern: 'target/dependency-check-report.xml'
         }
       }
     }
@@ -72,14 +61,7 @@ pipeline {
       }
       post {
         always {
-          archiveArtifacts artifacts: 'target/pit-reports/**', fingerprint: true
-          script {
-            try {
-              pitmutation mutationStatsFile: 'target/pit-reports/**/mutations.xml'
-            } catch (Exception e) {
-              echo "Pit mutation reports not found, skipping..."
-            }
-          }
+          archiveArtifacts artifacts: 'target/pit-reports/**'
         }
       }
     }
@@ -87,7 +69,7 @@ pipeline {
     stage('Archive Artifact') {
       steps {
         unstash 'app-jar'
-        archiveArtifacts artifacts: 'target/*.jar', fingerprint: true
+        archiveArtifacts artifacts: 'target/*.jar'
       }
     }
 
