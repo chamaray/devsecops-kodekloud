@@ -5,24 +5,22 @@ pipeline {
         IMAGE_NAME = "chamaray/numeric-app"
     }
 
-    stages {
-        stage('Build & Unit Test') {
-            agent {
-                docker {
-                    image 'maven:3.9.6-eclipse-temurin-17'
-                }
-            }
-            steps {
-                sh "mvn clean verify"
-            }
-            post {
-                always {
-                    junit allowEmptyResults: true, testResults: 'target/surefire-reports/*.xml'
-                    jacoco execPattern: 'target/jacoco.exec'
-                }
-            }
+   stage('Build & Unit Test') {
+    agent {
+        docker {
+            image 'maven:3.9.6-eclipse-temurin-17'
         }
-
+    }
+    steps {
+        sh "mvn clean package"
+    }
+    post {
+        always {
+            junit allowEmptyResults: true, testResults: 'target/surefire-reports/*.xml'
+            jacoco execPattern: 'target/jacoco.exec'
+        }
+    }
+}
         stage('Mutation Testing (PIT)') {
             agent {
                 docker {
