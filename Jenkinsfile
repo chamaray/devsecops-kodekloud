@@ -5,22 +5,24 @@ pipeline {
         IMAGE_NAME = "chamaray/numeric-app"
     }
 
-   stage('Build & Unit Test') {
-    agent {
-        docker {
-            image 'maven:3.9.6-eclipse-temurin-17'
+    stages {
+        stage('Build & Unit Test') {
+            agent {
+                docker {
+                    image 'maven:3.9.6-eclipse-temurin-17'
+                }
+            }
+            steps {
+                sh "mvn clean package"
+            }
+            post {
+                always {
+                    junit allowEmptyResults: true, testResults: 'target/surefire-reports/*.xml'
+                    jacoco execPattern: 'target/jacoco.exec'
+                }
+            }
         }
-    }
-    steps {
-        sh "mvn clean package"
-    }
-    post {
-        always {
-            junit allowEmptyResults: true, testResults: 'target/surefire-reports/*.xml'
-            jacoco execPattern: 'target/jacoco.exec'
-        }
-    }
-}
+
         stage('Mutation Testing (PIT)') {
             agent {
                 docker {
@@ -33,11 +35,10 @@ pipeline {
             post {
                 always {
                     archiveArtifacts artifacts: 'target/pit-reports/**', fingerprint: true
-                    // Correct way to wrap Groovy logic
                     script {
-                        try {
+                        if (fileExists('target/pit-reports/mutations.xml')) {
                             pitmutation mutationStatsFile: '**/target/pit-reports/mutations.xml'
-                        } catch (Exception e) {
+                        } else {
                             echo "Pit mutation reports not found, skipping..."
                         }
                     }
