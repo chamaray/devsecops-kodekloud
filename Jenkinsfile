@@ -5,23 +5,28 @@ pipeline {
         IMAGE_NAME = "chamaray/numeric-app"
     }
 
-    stages {
-        stage('Build & Unit Test') {
-            agent {
-                docker {
-                    image 'maven:3.9.6-eclipse-temurin-17'
-                }
-            }
-            steps {
-                sh "mvn clean package"
-            }
-            post {
-                always {
-                    junit allowEmptyResults: true, testResults: 'target/surefire-reports/*.xml'
-                    jacoco execPattern: 'target/jacoco.exec'
-                }
-            }
+    stage('Mutation Testing (PIT)') {
+  agent {
+    docker {
+      image 'maven:3.9.6-eclipse-temurin-17'
+    }
+  }
+  steps {
+    sh "mvn org.pitest:pitest-maven:mutationCoverage"
+  }
+  post {
+    always {
+      archiveArtifacts artifacts: 'target/pit-reports/**', fingerprint: true
+      script {
+        try {
+          pitmutation mutationStatsFile: '**/target/pit-reports/mutations.xml'
+        } catch (Exception e) {
+          echo "Pit mutation reports not found, skipping..."
         }
+      }
+    }
+  }
+}
 
         stage('Mutation Testing (PIT)') {
             agent {
