@@ -7,12 +7,6 @@ pipeline {
 
   stages {
 
-    stage('Checkout') {
-      steps {
-        git 'https://github.com/chamaray/devsecops-kodekloud'
-      }
-    }
-
     stage('Build & Unit Test') {
       agent {
         docker {
@@ -56,12 +50,10 @@ pipeline {
     stage('Docker Build & Push') {
       steps {
         withDockerRegistry([credentialsId: "docker-hub", url: ""]) {
-
           sh """
           docker build -t ${IMAGE_NAME}:${GIT_COMMIT} .
           docker push ${IMAGE_NAME}:${GIT_COMMIT}
           """
-
         }
       }
     }
@@ -69,12 +61,10 @@ pipeline {
     stage('Kubernetes Deployment - DEV') {
       steps {
         withKubeConfig([credentialsId: 'kubeconfig']) {
-
           sh """
           sed -i 's#replace#${IMAGE_NAME}:${GIT_COMMIT}#g' k8s_deployment_service.yaml
           kubectl apply -f k8s_deployment_service.yaml
           """
-
         }
       }
     }
