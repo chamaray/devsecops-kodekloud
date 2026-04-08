@@ -46,6 +46,14 @@
         </dependency>
     </dependencies>
 
+     <!-- Source: https://mvnrepository.com/artifact/org.owasp/dependency-check-maven -->
+<dependency>
+    <groupId>org.owasp</groupId>
+    <artifactId>dependency-check-maven</artifactId>
+    <version>12.1.9</version>
+    <scope>compile</scope>
+</dependency>    
+
     <build>
         <plugins>
             <plugin>
