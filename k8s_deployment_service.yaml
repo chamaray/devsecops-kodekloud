@@ -15,10 +15,10 @@ spec:
         app: devsecops
     spec:
       containers:
-        - name: devsecops-container
-          image: replace
-          ports:
-            - containerPort: 8080
+      - name: devsecops-container
+        image: replace
+        ports:
+        - containerPort: 8080
 ---
 apiVersion: v1
 kind: Service
@@ -31,6 +31,6 @@ spec:
   selector:
     app: devsecops
   ports:
-    - port: 8080
-      targetPort: 8080
-      nodePort: 30007
+  - port: 8080
+    targetPort: 8080
+    nodePort: 30007
