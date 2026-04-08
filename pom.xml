@@ -8,16 +8,11 @@
     <groupId>com.devsecops</groupId>
     <artifactId>numeric</artifactId>
     <version>1.0.0</version>
-    <packaging>jar</packaging>
 
-    <name>numeric</name>
-
-    <!-- 🔥 Spring Boot Parent -->
     <parent>
         <groupId>org.springframework.boot</groupId>
         <artifactId>spring-boot-starter-parent</artifactId>
         <version>3.2.5</version>
-        <relativePath/>
     </parent>
 
     <properties>
@@ -26,23 +21,30 @@
 
     <dependencies>
 
-        <!-- ✅ Spring Boot Web -->
+        <!-- Spring Boot -->
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-web</artifactId>
         </dependency>
 
-        <!-- ✅ Logging (SLF4J included automatically, but explicit is ok) -->
+        <!-- Logging -->
         <dependency>
             <groupId>org.slf4j</groupId>
             <artifactId>slf4j-api</artifactId>
         </dependency>
 
-        <!-- ✅ Test -->
+        <!-- Testing (JUnit 5) -->
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-test</artifactId>
             <scope>test</scope>
+        </dependency>
+
+        <!-- PIT JUnit5 Support -->
+        <dependency>
+            <groupId>org.pitest</groupId>
+            <artifactId>pitest-junit5-plugin</artifactId>
+            <version>1.2.1</version>
         </dependency>
 
     </dependencies>
@@ -50,13 +52,13 @@
     <build>
         <plugins>
 
-            <!-- ✅ Spring Boot Plugin -->
+            <!-- Spring Boot -->
             <plugin>
                 <groupId>org.springframework.boot</groupId>
                 <artifactId>spring-boot-maven-plugin</artifactId>
             </plugin>
 
-            <!-- ✅ JaCoCo (you are using it in Jenkins) -->
+            <!-- JaCoCo -->
             <plugin>
                 <groupId>org.jacoco</groupId>
                 <artifactId>jacoco-maven-plugin</artifactId>
@@ -68,6 +70,23 @@
                         </goals>
                     </execution>
                 </executions>
+            </plugin>
+
+            <!-- PIT Mutation Testing -->
+            <plugin>
+                <groupId>org.pitest</groupId>
+                <artifactId>pitest-maven</artifactId>
+                <version>1.15.0</version>
+
+                <configuration>
+                    <targetClasses>
+                        <param>com.devsecops.*</param>
+                    </targetClasses>
+                    <targetTests>
+                        <param>com.devsecops.*</param>
+                    </targetTests>
+                    <useClasspathJar>true</useClasspathJar>
+                </configuration>
             </plugin>
 
         </plugins>
