@@ -36,7 +36,12 @@ pipeline {
       post {
         always {
           archiveArtifacts artifacts: 'target/pit-reports/**', fingerprint: true
-          pitmutation failWhenNoReports: false, mutationStatsFile: '**/target/pit-reports/mutations.xml'
+          // Remove unsupported failWhenNoReports
+          try {
+              pitmutation mutationStatsFile: '**/target/pit-reports/mutations.xml'
+          } catch (Exception e) {
+              echo "Pit mutation reports not found, skipping..."
+          }
         }
       }
     }
@@ -72,11 +77,7 @@ pipeline {
   }
 
   post {
-    success {
-      echo "✅ Pipeline executed successfully!"
-    }
-    failure {
-      echo "❌ Pipeline failed. Check logs."
-    }
+    success { echo "✅ Pipeline executed successfully!" }
+    failure { echo "❌ Pipeline failed. Check logs." }
   }
 }
