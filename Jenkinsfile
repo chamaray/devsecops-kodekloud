@@ -39,7 +39,7 @@ pipeline {
           -Dsonar.projectKey=numeric-appication \
           -Dsonar.projectName=numeric-appication \
           -Dsonar.host.url=http://51.142.180.96:9000 \
-          -Dsonar.login=squ_7167cf463fa35a9e954c2a3c5b9ea438f155f849
+          -Dsonar.login=$SONAR_TOKEN
           """
         }
       }
