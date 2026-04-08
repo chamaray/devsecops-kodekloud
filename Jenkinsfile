@@ -38,8 +38,8 @@ pipeline {
           mvn sonar:sonar \
           -Dsonar.projectKey=numeric-appication \
           -Dsonar.projectName=numeric-appication \
-          -Dsonar.host.url=${SONAR_HOST_URL} \
-          -Dsonar.login=$SONAR_TOKEN
+          -Dsonar.host.url=http://51.142.180.96:9000 \
+          -Dsonar.login=13823Textile?
           """
         }
       }
