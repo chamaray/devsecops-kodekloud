@@ -19,7 +19,7 @@ class NumericApplicationTests {
 
     @Test
     void smallerThanOrEqualToFiftyMessage() throws Exception {
-        mockMvc.perform(get("/compare/49"))
+        mockMvc.perform(get("/compare/50"))
                 .andExpect(status().isOk())
                 .andExpect(content().string("Smaller than or equal to 50"));
     }
