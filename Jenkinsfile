@@ -1,9 +1,12 @@
 pipeline {
   agent any
+
   environment {
     IMAGE_NAME = "chamaray/numeric-app"
   }
+
   stages {
+
     stage('Build & Unit Test') {
       agent {
         docker {
@@ -22,21 +25,25 @@ pipeline {
       }
     }
 
+    // ✅ SonarQube should be a separate stage
+    stage('SonarQube - SAST') {
+      agent {
+        docker {
+          image 'maven:3.9.6-eclipse-temurin-17'
+        }
+      }
+      steps {
+        sh "mvn clean verify sonar:sonar -Dsonar.projectKey=numeric-appication -Dsonar.projectName='numeric-appication'"
+      }
+    }
+
+    // ✅ Mutation testing as separate stage
     stage('Mutation Testing (PIT)') {
       agent {
         docker {
           image 'maven:3.9.6-eclipse-temurin-17'
         }
       }
-
-    stage ('SonarQube - SAST'){
-      steps{
-        sh "${mvn}/bin/mvn clean verify org.sonarsource.scanner.maven:sonar-maven-plugin:sonar -Dsonar.projectKey=numeric-appication -Dsonar.projectName='numeric-appication'"
-      }
-      
-      }
-
-      
       steps {
         sh "mvn org.pitest:pitest-maven:mutationCoverage"
       }
