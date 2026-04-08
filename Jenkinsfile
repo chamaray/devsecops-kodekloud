@@ -39,7 +39,7 @@ pipeline {
           -Dsonar.projectKey=numeric-appication \
           -Dsonar.projectName=numeric-appication \
           -Dsonar.host.url=http://51.142.180.96:9000 \
-          -Dsonar.login=13823Textile?
+          -Dsonar.login=sqp_031a335c5213322dc2f33f3cbd0025b612df7a38
           """
         }
       }
