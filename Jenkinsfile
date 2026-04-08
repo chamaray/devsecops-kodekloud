@@ -3,6 +3,7 @@ pipeline {
 
   environment {
     IMAGE_NAME = "chamaray/numeric-app"
+    SONAR_HOST_URL = "http://51.142.180.96:9000"
   }
 
   stages {
@@ -25,7 +26,6 @@ pipeline {
       }
     }
 
-    // ✅ SonarQube should be a separate stage
     stage('SonarQube - SAST') {
       agent {
         docker {
@@ -33,11 +33,18 @@ pipeline {
         }
       }
       steps {
-        sh "mvn clean verify sonar:sonar -Dsonar.projectKey=numeric-appication -Dsonar.projectName='numeric-appication'"
+        withCredentials([string(credentialsId: 'sonar-token', variable: 'SONAR_TOKEN')]) {
+          sh """
+          mvn sonar:sonar \
+          -Dsonar.projectKey=numeric-appication \
+          -Dsonar.projectName=numeric-appication \
+          -Dsonar.host.url=${SONAR_HOST_URL} \
+          -Dsonar.login=$SONAR_TOKEN
+          """
+        }
       }
     }
 
-    // ✅ Mutation testing as separate stage
     stage('Mutation Testing (PIT)') {
       agent {
         docker {
