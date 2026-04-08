@@ -105,6 +105,43 @@
             </plugin>
 
         </plugins>
+
+         <plugin>
+    <groupId>org.pitest</groupId>
+    <artifactId>pitest-maven</artifactId>
+    <version>1.15.0</version>
+
+    <dependencies>
+        <dependency>
+            <groupId>org.pitest</groupId>
+            <artifactId>pitest-junit5-plugin</artifactId>
+            <version>1.2.0</version>
+        </dependency>
+    </dependencies>
+
+    <configuration>
+        <mutationThreshold>70</mutationThreshold>
+        <coverageThreshold>80</coverageThreshold>
+
+        <targetClasses>
+            <param>com.yourpackage.*</param>
+        </targetClasses>
+        <targetTests>
+            <param>com.yourpackage.*</param>
+        </targetTests>
+
+        <threads>+AUTO</threads>
+
+        <outputFormats>
+            <outputFormat>XML</outputFormat>
+            <outputFormat>HTML</outputFormat>
+        </outputFormats>
+
+        <reportsDirectory>
+            ${project.build.directory}/pit-reports
+        </reportsDirectory>
+    </configuration>
+</plugin>
     </build>
 
 </project>
