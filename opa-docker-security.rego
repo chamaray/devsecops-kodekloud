@@ -1,11 +1,12 @@
 package docker.security
+import rego.v1
 
 # Deny using latest tag
 deny[msg] {
     some i
     input[i].Cmd == "FROM"
     endswith(lower(input[i].Value[0]), ":latest")
-    msg = "Do not use 'latest' tag for base images"
+    msg = "Do not use 'latest' tag"
 }
 
 # Deny running as root
