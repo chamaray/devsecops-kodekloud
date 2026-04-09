@@ -7,6 +7,9 @@ pipeline {
 
   stages {
 
+    // =========================
+    // Build & Unit Test
+    // =========================
     stage('Build & Unit Test') {
       agent {
         docker {
@@ -25,6 +28,9 @@ pipeline {
       }
     }
 
+    // =========================
+    // SonarQube Analysis
+    // =========================
     stage('SonarQube - SAST') {
       agent {
         docker {
@@ -42,6 +48,9 @@ pipeline {
       }
     }
 
+    // =========================
+    // Quality Gate
+    // =========================
     stage('Quality Gate') {
       steps {
         timeout(time: 2, unit: 'MINUTES') {
@@ -50,6 +59,49 @@ pipeline {
       }
     }
 
+    // =========================
+    // Vulnerability Scans (Parallel)
+    // =========================
+    stage('Vulnerability Scan') {
+      parallel {
+
+        // OWASP Dependency Check
+        stage('Dependency Scan') {
+          agent {
+            docker {
+              image 'maven:3.9.6-eclipse-temurin-17'
+            }
+          }
+          steps {
+            sh "mvn dependency-check:check"
+          }
+          post {
+            always {
+              dependencyCheckPublisher pattern: 'target/dependency-check-report.xml'
+            }
+          }
+        }
+
+        // Trivy Docker Image Scan
+        stage('Trivy Scan') {
+          steps {
+            sh """
+            docker run --rm \
+              -v /var/run/docker.sock:/var/run/docker.sock \
+              -v ~/.cache:/root/.cache \
+              aquasec/trivy:0.50.0 \
+              image --severity HIGH,CRITICAL \
+              --exit-code 1 \
+              ${IMAGE_NAME}:${GIT_COMMIT} || true
+            """
+          }
+        }
+      }
+    }
+
+    // =========================
+    // Mutation Testing
+    // =========================
     stage('Mutation Testing (PIT)') {
       agent {
         docker {
@@ -61,18 +113,24 @@ pipeline {
       }
       post {
         always {
-          archiveArtifacts artifacts: 'target/pit-reports/**'
+          archiveArtifacts artifacts: 'target/pit-reports/**', fingerprint: true
         }
       }
     }
 
+    // =========================
+    // Archive Artifact
+    // =========================
     stage('Archive Artifact') {
       steps {
         unstash 'app-jar'
-        archiveArtifacts artifacts: 'target/*.jar'
+        archiveArtifacts artifacts: 'target/*.jar', fingerprint: true
       }
     }
 
+    // =========================
+    // Docker Build & Push
+    // =========================
     stage('Docker Build & Push') {
       steps {
         unstash 'app-jar'
@@ -85,6 +143,9 @@ pipeline {
       }
     }
 
+    // =========================
+    // Deploy to Kubernetes
+    // =========================
     stage('Deploy to Kubernetes') {
       steps {
         withKubeConfig([credentialsId: 'kubeconfig']) {
@@ -95,22 +156,17 @@ pipeline {
         }
       }
     }
-    stage('Vulnerability Scan - Docker'){
-      steps{
-        parallel{
-          "Dependency Scan" :{
-            sh "mvn dependency-check:check"
-          },
-            "Trivy Scan":{
-              sh "bash trivy-docker-image-scan.sh"
-            }
-        }
-      }
-    }
   }
 
+  // =========================
+  // Post Actions
+  // =========================
   post {
-    success { echo "✅ Pipeline executed successfully!" }
-    failure { echo "❌ Pipeline failed. Check logs." }
+    success {
+      echo "✅ Pipeline executed successfully!"
+    }
+    failure {
+      echo "❌ Pipeline failed. Check logs."
+    }
   }
 }
