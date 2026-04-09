@@ -63,24 +63,39 @@ pipeline {
     // Vulnerability Scans (Parallel)
     // =========================
     stage('Vulnerability Scan') {
-      parallel {
+  parallel {
 
-        // OWASP Dependency Check
-        stage('Dependency Scan') {
-          agent {
-            docker {
-              image 'maven:3.9.6-eclipse-temurin-17'
-            }
-          }
-          steps {
-            sh "mvn dependency-check:check"
-          }
-          post {
-            always {
-              dependencyCheckPublisher pattern: 'target/dependency-check-report.xml'
-            }
-          }
+    stage('Dependency Scan') {
+      agent {
+        docker {
+          image 'maven:3.9.6-eclipse-temurin-17'
         }
+      }
+      steps {
+        sh "mvn dependency-check:check"
+      }
+      post {
+        always {
+          dependencyCheckPublisher pattern: 'target/dependency-check-report.xml'
+        }
+      }
+    }
+
+    stage('OPA Conftest') {
+      steps {
+        sh """
+        docker run --rm \
+          -v \$(pwd):/project \
+          openpolicyagent/conftest test \
+          --policy opa-docker-security.rego \
+          Dockerfile \
+          --all-namespaces
+        """
+      }
+    }
+
+  }
+}
 
         // Trivy Docker Image Scan
         stage('Trivy Scan') {
