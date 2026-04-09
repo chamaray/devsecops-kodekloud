@@ -2,7 +2,7 @@ package docker.security
 import rego.v1
 
 # Deny using latest tag
-deny[msg] if {
+deny[msg] {
     some i
     input[i].Cmd == "FROM"
     endswith(lower(input[i].Value[0]), ":latest")
@@ -10,32 +10,32 @@ deny[msg] if {
 }
 
 # Deny running as root
-deny[msg] if {
+deny[msg] {
     not user_defined
     msg = "Container must not run as root user"
 }
 
-user_defined if {
+user_defined {
     some i
     input[i].Cmd == "USER"
 }
 
 # Deny ADD commands
-deny[msg] if {
+deny[msg] {
     some i
     input[i].Cmd == "ADD"
     msg = "Use COPY instead of ADD"
 }
 
 # Deny dangerous RUN patterns
-deny[msg] if {
+deny[msg] {
     some i
     input[i].Cmd == "RUN"
     contains(lower(concat(" ", input[i].Value)), "apt-get upgrade")
     msg = "Avoid using apt-get upgrade"
 }
 
-deny[msg] if {
+deny[msg] {
     some i
     input[i].Cmd == "RUN"
     contains(lower(concat(" ", input[i].Value)), "curl")
@@ -44,7 +44,7 @@ deny[msg] if {
     msg = "Avoid curl | sh pattern (possible security risk)"
 }
 
-deny[msg] if {
+deny[msg] {
     some i
     input[i].Cmd == "RUN"
     contains(lower(concat(" ", input[i].Value)), "sudo")
@@ -52,7 +52,7 @@ deny[msg] if {
 }
 
 # Deny exposing SSH
-deny[msg] if {
+deny[msg] {
     some i
     input[i].Cmd == "EXPOSE"
     input[i].Value[0] == "22"
